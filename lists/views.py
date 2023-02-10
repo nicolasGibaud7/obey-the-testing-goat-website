@@ -1,6 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
+from django.views.generic import FormView
 
 from lists.forms import ExistingListItemForm, ItemForm
 from lists.models import Item, List
@@ -8,8 +9,9 @@ from lists.models import Item, List
 # Create your views here.
 
 
-def home_page(request: HttpRequest):
-    return render(request, "home.html", {"form": ItemForm()})
+class HomePageView(FormView):
+    template_name = "home.html"
+    form_class = ItemForm
 
 
 def view_list(request: HttpRequest, list_id: int):
