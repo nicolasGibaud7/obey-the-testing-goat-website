@@ -1,7 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
-from django.views.generic import FormView
+from django.views.generic import CreateView, DetailView, FormView
 
 from lists.forms import ExistingListItemForm, ItemForm
 from lists.models import Item, List
@@ -14,22 +14,18 @@ class HomePageView(FormView):
     form_class = ItemForm
 
 
-def view_list(request: HttpRequest, list_id: int):
-    list_ = List.objects.get(id=list_id)
-    form = ExistingListItemForm(for_list=list_)
-    if request.method == "POST":
-        form = ExistingListItemForm(for_list=list_, data=request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect(list_)
-    return render(request, "list.html", {"list": list_, "form": form})
-
-
-def new_list(request: HttpRequest):
-    form = ItemForm(data=request.POST)
-    if form.is_valid():
+class NewListView(CreateView, HomePageView):
+    def form_valid(self, form):
         list_ = List.objects.create()
         form.save(for_list=list_)
         return redirect(list_)
-    else:
-        return render(request, "home.html", {"form": form})
+
+
+class ViewAndAddToList(DetailView, CreateView):
+    model = List
+    template_name = "list.html"
+    form_class = ExistingListItemForm
+
+    def get_form(self):
+        self.object = self.get_object()
+        return self.form_class(for_list=self.object, data=self.request.POST)
