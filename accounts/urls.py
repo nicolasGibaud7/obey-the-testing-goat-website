@@ -1,4 +1,5 @@
 from django.conf.urls import url
+from django.contrib.auth.views import logout
 
 from accounts import views
 
@@ -9,4 +10,5 @@ urlpatterns = [
         name="send_login_email",
     ),
     url(r"^login$", views.login, name="login"),
+    url(r"^logout$", logout, {"next_page": "/"}, name="logout"),
 ]
